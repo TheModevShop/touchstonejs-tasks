@@ -12,6 +12,9 @@ var source = require('vinyl-source-stream');
 var watchify = require('watchify');
 var xtend = require('xtend');
 
+var LessPluginAutoPrefix = require('less-plugin-autoprefix');
+var autoprefix = new LessPluginAutoPrefix({ browsers: ["last 2 versions"] });
+
 module.exports = function (gulp) {
 	var wwwDir = './www'
 
@@ -56,7 +59,8 @@ module.exports = function (gulp) {
 	function buildApp (entries, transforms, dest, watch) {
 		var opts = xtend(watch && watchify.args, {
 			entries: entries,
-			debug: process.env.NODE_ENV !== 'production'
+			debug: process.env.NODE_ENV !== 'production',
+			paths: ['src/js']
 		});
 
 		var app = browserify(opts);
@@ -100,7 +104,7 @@ module.exports = function (gulp) {
 	gulp.task('fonts', plumb.bind(null, 'src/fonts/**', [], wwwDir + '/fonts'));
 	gulp.task('html', plumb.bind(null, 'src/*.html', [], wwwDir));
 	gulp.task('images', plumb.bind(null, 'src/img/**', [], wwwDir + '/img'));
-	gulp.task('less', plumb.bind(null, 'src/css/app.less', [less], wwwDir + '/css'));
+	gulp.task('less', plumb.bind(null, 'src/css/app.less', [less], wwwDir + '/css', {plugins: [autoprefix]}));
 	gulp.task('scripts', buildApp.bind(null, ['./src/js/app.js'], [babelifyTransform, brfs], wwwDir + '/js', false));
 	gulp.task('build', ['html', 'images', 'fonts', 'less', 'scripts']);
 
